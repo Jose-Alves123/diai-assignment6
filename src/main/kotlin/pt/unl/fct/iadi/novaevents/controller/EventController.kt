@@ -3,6 +3,7 @@ package pt.unl.fct.iadi.novaevents.controller
 import jakarta.validation.Valid
 import java.time.LocalDate
 import org.springframework.format.annotation.DateTimeFormat
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.validation.BindingResult
@@ -100,6 +101,7 @@ class EventController(
     }
 
     @GetMapping("/clubs/{clubId}/events/{eventId}/edit", "/events/{eventId}/edit")
+    @PreAuthorize("@eventAuthorizationService.canEdit(#eventId, authentication)")
     fun editEventForm(
             @PathVariable(required = false) clubId: Long?,
             @PathVariable eventId: Long,
@@ -129,6 +131,7 @@ class EventController(
             "/events/{eventId}",
             "/events/{eventId}/edit"
     )
+    @PreAuthorize("@eventAuthorizationService.canEdit(#eventId, authentication)")
     fun updateEvent(
             @PathVariable(required = false) clubId: Long?,
             @PathVariable eventId: Long,
@@ -155,6 +158,7 @@ class EventController(
     }
 
     @GetMapping("/clubs/{clubId}/events/{eventId}/delete", "/events/{eventId}/delete")
+    @PreAuthorize("@eventAuthorizationService.canDelete(#eventId, authentication)")
     fun deleteConfirmation(
             @PathVariable(required = false) clubId: Long?,
             @PathVariable eventId: Long,
@@ -172,6 +176,7 @@ class EventController(
             "/events/{eventId}",
             "/events/{eventId}/delete"
     )
+    @PreAuthorize("@eventAuthorizationService.canDelete(#eventId, authentication)")
     fun deleteEvent(
             @PathVariable(required = false) clubId: Long?,
             @PathVariable eventId: Long

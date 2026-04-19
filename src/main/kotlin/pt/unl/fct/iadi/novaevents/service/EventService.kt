@@ -1,11 +1,13 @@
 package pt.unl.fct.iadi.novaevents.service
 
 import java.util.NoSuchElementException
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import pt.unl.fct.iadi.novaevents.controller.dto.EventFormDto
 import pt.unl.fct.iadi.novaevents.model.Event
 import pt.unl.fct.iadi.novaevents.model.EventType
+import pt.unl.fct.iadi.novaevents.repository.AppUserRepository
 import pt.unl.fct.iadi.novaevents.repository.ClubRepository
 import pt.unl.fct.iadi.novaevents.repository.EventRepository
 import pt.unl.fct.iadi.novaevents.repository.EventTypeRepository
@@ -14,7 +16,8 @@ import pt.unl.fct.iadi.novaevents.repository.EventTypeRepository
 class EventService(
         private val eventRepository: EventRepository,
         private val clubRepository: ClubRepository,
-        private val eventTypeRepository: EventTypeRepository
+        private val eventTypeRepository: EventTypeRepository,
+        private val appUserRepository: AppUserRepository
 ) {
 
         fun findAll(filter: EventFilter): List<Event> {
@@ -46,11 +49,17 @@ class EventService(
         @Transactional
         fun create(clubId: Long, form: EventFormDto): Event {
                 validateUniqueName(form.name!!, null)
+                val username =
+                        SecurityContextHolder.getContext().authentication?.name
+                                ?: throw IllegalStateException("Authenticated user is required")
                 val club =
                         clubRepository.findById(clubId).orElseThrow {
                                 NoSuchElementException("Club with id $clubId was not found")
                         }
                 val type = resolveType(form.type!!)
+                val owner =
+                        appUserRepository.findByUsername(username)
+                                ?: throw NoSuchElementException("User '$username' was not found")
 
                 val event =
                         Event(
@@ -59,6 +68,7 @@ class EventService(
                                 date = form.date!!,
                                 location = normalizeOptionalText(form.location),
                                 type = type,
+                                owner = owner,
                                 description = normalizeOptionalText(form.description)
                         )
                 return eventRepository.save(event)

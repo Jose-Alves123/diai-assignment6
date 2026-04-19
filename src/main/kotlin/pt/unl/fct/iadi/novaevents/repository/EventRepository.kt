@@ -7,16 +7,18 @@ import org.springframework.data.repository.query.Param
 import pt.unl.fct.iadi.novaevents.model.Event
 
 interface EventRepository : JpaRepository<Event, Long> {
-    fun existsByNameIgnoreCase(name: String): Boolean
+        fun existsByNameIgnoreCase(name: String): Boolean
 
-    fun existsByNameIgnoreCaseAndIdNot(name: String, id: Long): Boolean
+        fun existsByNameIgnoreCaseAndIdNot(name: String, id: Long): Boolean
 
-    fun findByIdAndClub_Id(id: Long, clubId: Long): Event?
+        fun findByIdAndClub_Id(id: Long, clubId: Long): Event?
 
-    fun findByClub_IdOrderByDate(clubId: Long): List<Event>
+        fun findByClub_IdOrderByDate(clubId: Long): List<Event>
 
-    @Query(
-            """
+        fun existsByIdAndOwner_Username(id: Long, username: String): Boolean
+
+        @Query(
+                """
             select e
             from Event e
             where (:typeName is null or lower(e.type.name) = lower(:typeName))
@@ -25,11 +27,11 @@ interface EventRepository : JpaRepository<Event, Long> {
               and (:toDate is null or e.date <= :toDate)
             order by e.date
             """
-    )
-    fun findAllByFilter(
-            @Param("typeName") typeName: String?,
-            @Param("clubId") clubId: Long?,
-            @Param("fromDate") fromDate: LocalDate?,
-            @Param("toDate") toDate: LocalDate?
-    ): List<Event>
+        )
+        fun findAllByFilter(
+                @Param("typeName") typeName: String?,
+                @Param("clubId") clubId: Long?,
+                @Param("fromDate") fromDate: LocalDate?,
+                @Param("toDate") toDate: LocalDate?
+        ): List<Event>
 }

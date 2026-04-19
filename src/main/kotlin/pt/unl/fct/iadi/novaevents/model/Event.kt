@@ -24,6 +24,9 @@ class Event(
         @ManyToOne(fetch = FetchType.LAZY)
         @JoinColumn(name = "type_id", nullable = false)
         var type: EventType = EventType(),
+        @ManyToOne(fetch = FetchType.LAZY)
+        @JoinColumn(name = "owner_id", nullable = false)
+        var owner: AppUser = AppUser(),
         var description: String? = null
 ) {
         val clubId: Long
